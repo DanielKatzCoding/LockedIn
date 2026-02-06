@@ -8,7 +8,7 @@ import { mockJobDashboardData } from "@/lib/mockData"
 export function DashboardContent({isTest=false}: {isTest?: boolean}) {
   if (isTest) {
     return (
-      <div className="container mx-auto py-10">
+      <div className="flex-1 mx-10">
         <DataTable columns={columns} data={mockJobDashboardData} />
       </div>
     )
@@ -16,15 +16,15 @@ export function DashboardContent({isTest=false}: {isTest?: boolean}) {
   const { data, isLoading, error } = useDashboardData()
 
   if (isLoading) {
-    return <div className="container mx-auto py-10">Loading...</div>
+    return <div>Loading...</div>
   }
 
   if (error) {
-    return <div className="container mx-auto py-10">Error loading dashboard</div>
+    return <div>Error loading dashboard</div>
   }
 
   return (
-    <div className="container mx-auto py-10">
+    <div>
       <DataTable columns={columns} data={data || []} />
     </div>
   )
