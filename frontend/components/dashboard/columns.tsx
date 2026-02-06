@@ -1,9 +1,17 @@
 "use client"
 
+import { useState } from "react"
 import { ColumnDef } from "@tanstack/react-table"
 import { JobDashboard } from "@/types/dashboard"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
 
 export const columns: ColumnDef<JobDashboard>[] = [
   {
@@ -70,19 +78,42 @@ export const columns: ColumnDef<JobDashboard>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const value = row.getValue("status") as JobDashboard["status"]
+      const initialValue = row.getValue("status") as JobDashboard["status"]
+      const [status, setStatus] = useState(initialValue)
+
+      const statusBgColor = {
+        "Applied": "bg-blue-100 text-blue-800",
+        "Phone Screen": "bg-yellow-100 text-yellow-800",
+        "Interview": "bg-green-100 text-green-800",
+        "Rejected": "bg-red-100 text-red-800",
+        "Offer": "bg-purple-100 text-purple-800",
+      }[status]
 
       return (
-        <select
-          defaultValue={value}
-          className="h-8 rounded-md border border-input bg-background px-2 text-sm"
-        >
-          <option value="Applied">Applied</option>
-          <option value="Phone Screen">Phone Screen</option>
-          <option value="Interview">Interview</option>
-          <option value="Rejected">Rejected</option>
-          <option value="Offer">Offer</option>
-        </select>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className={`h-8 min-w-30 px-2 font-bold ${statusBgColor}`}>
+              {status}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-background">
+            <DropdownMenuItem onClick={() => setStatus("Applied")}>
+              Applied
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatus("Phone Screen")}>
+              Phone Screen
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatus("Interview")}>
+              Interview
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatus("Rejected")}>
+              Rejected
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setStatus("Offer")}>
+              Offer
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )
     },
   },
