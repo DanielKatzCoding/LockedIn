@@ -1,23 +1,13 @@
-'use client'
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { DashboardContent } from '@/components/dashboard-content'
-import { ReactNode } from 'react'
-
-function Providers({ children }: { children: ReactNode }) {
-  const queryClient = new QueryClient()
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  )
-}
+import { Providers } from '@/components/providers'
+import AddRecord from '@/components/add-record'
 
 export default function DemoPage() {
   return (
     <main className="min-h-screen flex p-20 justify-center">
       <Providers>
-        <div className="w-full">
+        <div className="w-full">          
+          <AddRecord />
           <DashboardContent isTest={true} />        
         </div>
       </Providers>

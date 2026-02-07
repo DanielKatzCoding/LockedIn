@@ -4,7 +4,7 @@ export type JobDashboard = {
   jobTitle: string
   applicationDate: string
   jobLink: string
-  status: "Applied" | "Phone Screen" | "Interview" | "Rejected" | "Offer"
+  status: "Applied" | "Phone Screen" | "Interview" | "Rejected" | "Offer" | null
   responseDate: string
   notes: string
 }

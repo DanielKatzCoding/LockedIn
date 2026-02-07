@@ -87,7 +87,8 @@ export const columns: ColumnDef<JobDashboard>[] = [
         "Interview": "bg-green-100 text-green-800",
         "Rejected": "bg-red-100 text-red-800",
         "Offer": "bg-purple-100 text-purple-800",
-      }[status]
+        "Not Selected": "bg-purple-100 text-gray-800",
+      }[status || "Not Selected"]
 
       return (
         <DropdownMenu>
@@ -96,7 +97,7 @@ export const columns: ColumnDef<JobDashboard>[] = [
               {status}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-background">
+          <DropdownMenuContent defaultValue={"Not Selected"} className="bg-background">
             <DropdownMenuItem onClick={() => setStatus("Applied")}>
               Applied
             </DropdownMenuItem>
