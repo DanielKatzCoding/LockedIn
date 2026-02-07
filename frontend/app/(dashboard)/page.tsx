@@ -15,9 +15,11 @@ function Providers({ children }: { children: ReactNode }) {
 
 export default function DemoPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center">
+    <main className="min-h-screen flex p-20 justify-center">
       <Providers>
-        <DashboardContent isTest={true} />        
+        <div className="w-full">
+          <DashboardContent isTest={true} />        
+        </div>
       </Providers>
     </main>
   )

@@ -7,10 +7,8 @@ import { mockJobDashboardData } from "@/lib/mockData"
 
 export function DashboardContent({isTest=false}: {isTest?: boolean}) {
   if (isTest) {
-    return (
-      <div className="flex-1 mx-10">
-        <DataTable columns={columns} data={mockJobDashboardData} />
-      </div>
+    return (      
+      <DataTable columns={columns} data={mockJobDashboardData} />      
     )
   }  
   const { data, isLoading, error } = useDashboardData()
@@ -24,8 +22,6 @@ export function DashboardContent({isTest=false}: {isTest?: boolean}) {
   }
 
   return (
-    <div>
-      <DataTable columns={columns} data={data || []} />
-    </div>
+    <DataTable columns={columns} data={data || []} />
   )
 }
