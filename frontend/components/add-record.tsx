@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button'
 import { useCreateEmptyRecord } from '@/hooks/Dashboard'
 import { toast } from 'react-toastify';
 
-const AddRecord = () => {
+const AddRecord = ({ isTest }: {isTest: boolean}) => {
   const { mutate, isPending } = useCreateEmptyRecord();
 
   const handleClick = () => {
-    mutate({ isTest: true }, {
+    mutate({isTest}, {
       onSuccess: () => toast.success("Record added successfully!"),
       onError: () => toast.error("Error adding record")
     });

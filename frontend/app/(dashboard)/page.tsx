@@ -6,8 +6,8 @@ export default function DemoPage() {
   return (
     <main className="min-h-screen flex p-20 justify-center">
       <Providers>
-        <div className="w-full">          
-          <AddRecord />
+        <div className="w-full">
+          <AddRecord isTest={true} />
           <DashboardContent isTest={true} />        
         </div>
       </Providers>

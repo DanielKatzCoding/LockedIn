@@ -41,11 +41,12 @@ export const useCreateEmptyRecord = () => {
         })
         
       } else {
-        await axios.post<JobDashboard>(
+        const res = await axios.post<JobDashboard>(
           `${API_BASE_URL}/api/dashboard/create`
         )
+        return res.data;
       }
-      return
+      
         
     },
     // Optional: Refresh the 'dashboard' list after a successful POST
