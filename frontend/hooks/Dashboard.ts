@@ -12,10 +12,13 @@ export const useDashboardData = (isTest: boolean) => {
     queryKey: ['dashboard'], 
     queryFn: async () => {
       if (isTest) {
-
-        return [...mockJobDashboardData]; 
+        // 2. Wrap the mock data in a resolve call
+        return await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve([...mockJobDashboardData]);
+          }, 2000); // 2000ms = 2 seconds
+        });
       }
-
       const { data } = await axios.get<JobDashboard[]>(`${API_BASE_URL}/api/dashboard`)
       return data
     },
@@ -49,9 +52,33 @@ export const useCreateEmptyRecord = () => {
       
         
     },
-    // Optional: Refresh the 'dashboard' list after a successful POST
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['dashboard'] })
+  })
+}
+
+// 2. New POST hook
+export const useUpdateRow = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({isTest}: {isTest: boolean}) => {
+      if (isTest) {
+        mockJobDashboardData.push({
+          id: "1",
+          company: "",
+          jobTitle: "",
+          applicationDate: "",
+          jobLink: "",
+          status: null,
+          responseDate: "",
+          notes: ""
+        })
+        
+      } else {
+        const res = await axios.post<JobDashboard>(
+          `${API_BASE_URL}/api/dashboard/create`
+        )
+        return res.data;
+      }              
     },
   })
 }
