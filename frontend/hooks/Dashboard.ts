@@ -6,7 +6,7 @@ import {v4 as uuid4} from 'uuid'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
-export const useDashboardData = (isTest: boolean) => {
+export const useDashboardData = (isTest: boolean=false) => {
   return useQuery<JobDashboard[]>({
     // Add isTest to the key so the cache is distinct for test vs real data
     queryKey: ['dashboard'], 
@@ -27,21 +27,18 @@ export const useDashboardData = (isTest: boolean) => {
 
 // 2. New POST hook
 export const useCreateEmptyRecord = () => {
-  const queryClient = useQueryClient()
-
   return useMutation({
-    mutationFn: async ({isTest}: {isTest: boolean}) => {
+    mutationFn: async ({newRow, isTest=false}: {newRow: JobDashboard, isTest: boolean}) => {
       if (isTest) {
-        mockJobDashboardData.push({
-          id: "1",
-          company: "",
-          jobTitle: "",
-          applicationDate: "",
-          jobLink: "",
-          status: null,
-          responseDate: "",
-          notes: ""
-        })
+        mockJobDashboardData.push(newRow)
+
+        return await new Promise(_ => {
+          setTimeout(() => {         
+            console.log("IN useCreateEmptyRecord DATA:")
+            console.log(mockJobDashboardData)   
+            return newRow
+          }, 2000); // 2000ms = 2 seconds
+        });
         
       } else {
         const res = await axios.post<JobDashboard>(
@@ -57,25 +54,26 @@ export const useCreateEmptyRecord = () => {
 
 // 2. New POST hook
 export const useUpdateRow = () => {
-  const queryClient = useQueryClient()
-
   return useMutation({
-    mutationFn: async ({isTest}: {isTest: boolean}) => {
+    mutationFn: async ({data, isTest=false}: {data: JobDashboard, isTest: boolean}) => {
       if (isTest) {
-        mockJobDashboardData.push({
-          id: "1",
-          company: "",
-          jobTitle: "",
-          applicationDate: "",
-          jobLink: "",
-          status: null,
-          responseDate: "",
-          notes: ""
+        for (let i  = 0; i < mockJobDashboardData.length; i++) {
+          if (mockJobDashboardData[i].id === data.id) {
+            mockJobDashboardData[i] = data
+            break
+          }
+        }
+        return await new Promise(_ => {
+          setTimeout(() => {
+            console.log("IN useUpdateRow DATA:")
+            console.log(mockJobDashboardData)
+            return data
+          }, 2000);
         })
-        
       } else {
         const res = await axios.post<JobDashboard>(
-          `${API_BASE_URL}/api/dashboard/create`
+          `${API_BASE_URL}/api/dashboard/${data.id}`,
+          data
         )
         return res.data;
       }              
