@@ -129,19 +129,23 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
   }, [])
 
     // When triggered, dataState will be sent to the backend for saving.
-  const setDataStateAndBackend = useCallback((data: JobDashboard[]) => {    
-    let newRowData: JobDashboard | null = null
+  const setDataStateAndBackend = useCallback((data: JobDashboard[]) => {
+    // Find all rows that have changed
+    const changedRows: JobDashboard[] = [];
     for (let i = 0; i < data.length; i++) {
-      if (data[i] != dataState[i]) {
-        newRowData = data[i]
-        break
+      // Compare objects by serializing them to JSON for deep comparison
+      if (JSON.stringify(data[i]) !== JSON.stringify(dataState[i])) {
+        changedRows.push(data[i]);
       }
     }
-    if (newRowData) {
-      mutateUpdateRow({ data: newRowData, isTest: isTest })
-      setDataState(data)
-    }
-  }, [])
+
+    // Update all changed rows in the backend
+    changedRows.forEach(row => {
+      mutateUpdateRow({ data: row, isTest: isTest });
+    });
+
+    setDataState(data);
+  }, [dataState, isTest, mutateUpdateRow]);
 
   useEffect(() => {
     if (isPendingUpdateRow) {
@@ -173,80 +177,6 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
     }
   }, [dataDashboardData, isErrorDashboardData])
 
-  // Custom paste handler that updates cells from selection point
-  const handlePaste = (e: ClipboardEvent<HTMLDivElement>) => {
-    // Only handle if grid or its children have focus
-    const gridElement = gridRef.current
-    if (!gridElement || !gridElement.contains(document.activeElement)) {
-      return
-    }
-
-    // Don't interfere if user is editing a cell (activeElement is an input/textarea)
-    const activeElement = document.activeElement
-    if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA') {
-      return
-    }
-
-    const text = e.clipboardData?.getData('text')
-    if (!text) return
-
-    e.preventDefault()
-    e.stopPropagation()
-    
-    // Get row index from row element
-    const rowElement = activeElement?.closest('[role="row"]')
-    const rowIndex = rowElement ? parseInt(rowElement.getAttribute('data-index') || '0') : 0
-    
-    // Get column index from gridcell aria-colindex
-    const gridCell = activeElement?.closest('[role="gridcell"]')
-    const colIndex = gridCell ? parseInt(gridCell.getAttribute('aria-colindex') || '1') - 1 : 0
-    
-    // Parse clipboard data into 2D array
-    const lines = text.split('\n').filter(line => line.trim())
-    const pasteData = lines.map(line => {
-      if (line.includes('\t')) {
-        return line.split('\t').map(v => v.trim())
-      } else {
-        return line.split(/\s{2,}/).map(v => v.trim())
-      }
-    })
-    
-    // Update data starting from selected cell
-    setDataState((prev) => {
-      const newData = [...prev]
-      
-      pasteData.forEach((rowData, pasteRowOffset) => {
-        const targetRowIndex = rowIndex + pasteRowOffset
-        
-        // Create new row if needed
-        while (targetRowIndex >= newData.length) {
-          onRowAdd()
-        }
-        
-        // Update cells across columns
-        rowData.forEach((cellValue, pasteColOffset) => {
-          const targetColIndex = colIndex + pasteColOffset
-          
-          // Map column index to field name (accounting for select checkbox at index 0)
-          if (targetColIndex > 0 && targetColIndex <= pasteableColumns.length) {
-            const columnKey = pasteableColumns[targetColIndex - 1] as keyof JobDashboard
-            newData[targetRowIndex] = {
-              ...newData[targetRowIndex],
-              [columnKey]: cellValue
-            }
-          }
-        })
-
-        mutateUpdateRow({ data: newData[targetRowIndex], isTest })
-      })
-      
-      return newData
-    })
-    
-    const cellsUpdated = pasteData.reduce((sum, row) => sum + row.length, 0)
-    toast.success(`Pasted ${cellsUpdated} cell(s)`)
-  }
-
   // DataGrid hook setup
   const { table, ...dataGridProps } = useDataGrid({
     columns,
@@ -256,8 +186,41 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
     autoFocus: true,
     onRowAdd,
     onRowsDelete,
-    getRowId: (row) => row.id
+    getRowId: (row) => row.id,
+    onPaste: (updates) => {
+      // The DataGrid will handle updating the state and calling onDataChange (setDataStateAndBackend)
+      // So we don't need to do anything here except let it propagate
+      // setDataStateAndBackend will be called automatically through onDataUpdate
+    },
   })
+
+  const handleCopy = useCallback((e: ClipboardEvent<HTMLDivElement>) => {
+    const activeElement = document.activeElement;
+    // Don't override if user is highlighting text inside an input
+    if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA') return;
+
+    const selectedRows = table.getSelectedRowModel().rows;
+    if (selectedRows.length === 0) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Map selected rows to a TSV (Tab Separated Values) string
+    const csvContent = selectedRows.map(row => {
+      return pasteableColumns
+        .map(key => {
+          const value = row.original[key as keyof JobDashboard];
+          return value !== null && value !== undefined ? String(value) : "";
+        })
+        .join('\t');
+    }).join('\n');
+
+    navigator.clipboard.writeText(csvContent).then(() => {
+      toast.success(`Copied ${selectedRows.length} row(s) to clipboard`);
+    }).catch(() => {
+      toast.error("Failed to copy to clipboard");
+    });
+  }, [table, pasteableColumns]);
 
   if (isLoadingDashboardData) {
     return (
@@ -271,10 +234,31 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
     return <h1>Error, Unable to load data.</h1>
   }
   
-  return (    
+  const handlePaste = (e: ClipboardEvent<HTMLDivElement>) => {
+    // Only handle if grid or its children have focus
+    const gridElement = gridRef.current;
+    if (!gridElement || !gridElement.contains(document.activeElement)) {
+      return;
+    }
+
+    // Don't interfere if user is editing a cell (activeElement is an input/textarea)
+    const activeElement = document.activeElement;
+    if (activeElement?.tagName === 'INPUT' || activeElement?.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    // Let the DataGrid handle paste through its internal mechanism
+    // This will trigger the onPaste callback we defined in useDataGrid
+    if (table.options.meta?.onCellsPaste) {
+      // Don't prevent default here, let DataGrid handle it internally
+      table.options.meta.onCellsPaste();
+    }
+  };
+
+  return (
     <TooltipProvider>
-      <div ref={gridRef} onPaste={(e) => handlePaste(e)}>
-        <DataGridKeyboardShortcuts enableSearch={!!dataGridProps.searchState} />
+      <div ref={gridRef} onCopyCapture={handleCopy} onPaste={handlePaste}>
+        <DataGridKeyboardShortcuts enableSearch={!!dataGridProps.searchState} enablePaste={true} />
         <DataGrid {...dataGridProps} table={table} stretchColumns={true} />
       </div>
     </TooltipProvider>
