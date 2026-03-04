@@ -129,19 +129,23 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
   }, [])
 
     // When triggered, dataState will be sent to the backend for saving.
-  const setDataStateAndBackend = useCallback((data: JobDashboard[]) => {    
-    let newRowData: JobDashboard | null = null
+  const setDataStateAndBackend = useCallback((data: JobDashboard[]) => {
+    // Find all rows that have changed
+    const changedRows: JobDashboard[] = [];
     for (let i = 0; i < data.length; i++) {
-      if (data[i] != dataState[i]) {
-        newRowData = data[i]
-        break
+      // Compare objects by serializing them to JSON for deep comparison
+      if (JSON.stringify(data[i]) !== JSON.stringify(dataState[i])) {
+        changedRows.push(data[i]);
       }
     }
-    if (newRowData) {
-      mutateUpdateRow({ data: newRowData, isTest: isTest })
-      setDataState(data)
-    }
-  }, [])
+
+    // Update all changed rows in the backend
+    changedRows.forEach(row => {
+      mutateUpdateRow({ data: row, isTest: isTest });
+    });
+
+    setDataState(data);
+  }, [dataState, isTest, mutateUpdateRow]);
 
   useEffect(() => {
     if (isPendingUpdateRow) {
@@ -184,28 +188,9 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
     onRowsDelete,
     getRowId: (row) => row.id,
     onPaste: (updates) => {
-      // Handle paste updates from the DataGrid and update backend
-      const newData = [...dataState];
-      const rowsToUpdate = new Map<string, JobDashboard>(); // Use map to deduplicate rows
-
-      updates.forEach(({ rowIndex, columnId, value }) => {
-        if (rowIndex < newData.length) {
-          newData[rowIndex] = {
-            ...newData[rowIndex],
-            [columnId]: value,
-          };
-          // Collect unique rows that need to be updated in the backend
-          rowsToUpdate.set(newData[rowIndex].id, newData[rowIndex]);
-        }
-      });
-
-      // Update the state first
-      setDataState(newData);
-
-      // Then update the backend for each unique row that was modified
-      Array.from(rowsToUpdate.values()).forEach(row => {
-        mutateUpdateRow({ data: row, isTest });
-      });
+      // The DataGrid will handle updating the state and calling onDataChange (setDataStateAndBackend)
+      // So we don't need to do anything here except let it propagate
+      // setDataStateAndBackend will be called automatically through onDataUpdate
     },
   })
 
