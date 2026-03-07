@@ -15,9 +15,11 @@ frontend/.next/
 frontend/out/
 
 # Env
-.env
+.env*
 .env.local
 .env*.local
+
+.claude/
 
 # IDE / OS
 .idea/
