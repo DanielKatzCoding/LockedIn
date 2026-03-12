@@ -1,14 +1,9 @@
-from uuid import uuid4, UUID
-from sqlmodel import SQLModel, Field
-from datetime import datetime, date
+from datetime import date
 from typing import Optional
+from pydantic import BaseModel
 from backend.enums.job_application import JobApplicationStatus
 
-
-class JobApplication(SQLModel, table=True):
-    __tablename__ = "job_applications"
-    
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
+class CreateJobApplication(BaseModel):
     company: Optional[str] = None
     job_title: Optional[str] = None
     application_date: Optional[date] = None
@@ -16,4 +11,3 @@ class JobApplication(SQLModel, table=True):
     status: Optional[JobApplicationStatus] = None
     response_date: Optional[date] = None
     notes: Optional[str] = None
-    

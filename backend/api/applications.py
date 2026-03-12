@@ -12,7 +12,6 @@ async def get_job_applications(skip: int = 0, limit: int = 100, db: AsyncSession
     job_applications = await db_service.crud.get_job_applications(db, skip=skip, limit=limit)
     return job_applications
 
-
 @router.post("/create", response_model=JobApplication, status_code=status.HTTP_201_CREATED)
 async def create_new_job_application(job_application: JobApplication, db: AsyncSession = Depends(db_service.get_db)):
     return await db_service.crud.create_job_application(db=db, job_application_data=job_application.model_dump())
