@@ -1,5 +1,5 @@
-import sys, os
-from enum import Enum
+import sys
+import os
 import pytest
 
 # Add project root to sys.path for imports

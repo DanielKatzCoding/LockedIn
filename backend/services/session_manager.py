@@ -24,7 +24,6 @@ async def get_db():
 async def init_db():
     """Initialize database and create tables"""
     # Ensure ORM models are imported so their metadata is registered
-    from backend.orm import schema  # loads JobApplication (and future models)
     from sqlmodel import SQLModel
 
     async with engine.begin() as conn:

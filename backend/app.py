@@ -1,5 +1,4 @@
 import sys
-import os
 from pathlib import Path
 # Ensure the project root (parent of the backend package) and the backend package itself are on sys.path
 # This must run BEFORE any project imports.
@@ -11,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 # Use relative imports now that the package is on the path
 from backend.api.applications import router as applications_router
 from backend.services.database_service import db_service
-import asyncio
 
 # ---------------------------------------------------------------------------
 # FastAPI application instance with a lifespan function

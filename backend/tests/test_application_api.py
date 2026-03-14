@@ -1,6 +1,4 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import sessionmaker
 
 def _id(json_obj):
     return json_obj.get("id")

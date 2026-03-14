@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from services.database_service import db_service
@@ -38,7 +38,7 @@ async def update_existing_job_application(
         job_application_id=job_application_id,
         job_application_update=job_application
     )
-    
+
     if db_job_application is None:
         raise HTTPException(status_code=404, detail="Job application not found")
     return db_job_application
