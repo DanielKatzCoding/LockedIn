@@ -11,7 +11,7 @@ class CreateJobApplicationModel(BaseModel):
     status: Optional[JobApplicationStatus] = None
     response_date: Optional[date] = None
     notes: Optional[str] = None
-    
+
 class JobApplicationModel(BaseModel):
     id: Optional[str] = None
     company: Optional[str] = None
@@ -21,4 +21,3 @@ class JobApplicationModel(BaseModel):
     status: Optional[JobApplicationStatus] = None
     response_date: Optional[date] = None
     notes: Optional[str] = None
-    

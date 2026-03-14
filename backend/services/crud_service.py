@@ -3,8 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from backend.model.job_application import CreateJobApplicationModel, JobApplicationModel
 from backend.orm.schema import JobApplication
-from datetime import date
-from backend.enums.job_application import JobApplicationStatus
 
 
 class CRUDService:
@@ -26,7 +24,7 @@ class CRUDService:
         await db.commit()
         await db.refresh(db_job_application)
         return db_job_application
-    
+
     async def create_empty_job_application(self, db: AsyncSession) -> JobApplication:
         db_job_application = JobApplication()
         db.add(db_job_application)
@@ -37,11 +35,11 @@ class CRUDService:
     async def update_job_application(self, db: AsyncSession, job_application_id: str, job_application_update: JobApplicationModel) -> Optional[JobApplication]:
         if job_application_id != job_application_update.id:
             return None  # ID mismatch, cannot update
-        
+
         db_job_application = await self.get_job_application(db, job_application_id)
         if db_job_application is None:
             return None
-        
+
         for key, value in job_application_update.model_dump(exclude_unset=True).items():
             # Convert date strings to date objects for date fields
             if key in ("application_date", "response_date"):
@@ -58,9 +56,9 @@ class CRUDService:
                     value = JobApplicationStatus(value)
                 except ValueError:
                     pass
-                
+
             setattr(db_job_application, key, value)
-            
+
         await db.commit()
         await db.refresh(db_job_application)
         return db_job_application
