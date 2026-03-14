@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from services.database_service import db_service
 from backend.orm.schema import JobApplication
-from backend.model.job_application import CreateJobApplication
+from backend.model.job_application import CreateJobApplicationModel, JobApplicationModel
 
 router = APIRouter(prefix="/api/applications", tags=["applications"])
 
@@ -20,8 +20,8 @@ async def get_job_application(job_application_id: str, db: AsyncSession = Depend
     return db_job_application
 
 @router.post("/create", response_model=JobApplication, status_code=status.HTTP_201_CREATED)
-async def create_new_job_application(job_application: CreateJobApplication, db: AsyncSession = Depends(db_service.get_db)):
-    return await db_service.crud.create_job_application(db=db, job_application_data=job_application.model_dump())
+async def create_new_job_application(job_application: CreateJobApplicationModel, db: AsyncSession = Depends(db_service.get_db)):
+    return await db_service.crud.create_job_application(db=db, job_application_data=job_application)
 
 @router.post("/create/empty", response_model=JobApplication, status_code=status.HTTP_201_CREATED)
 async def create_new_empty_job_application(db: AsyncSession = Depends(db_service.get_db)):
@@ -30,7 +30,7 @@ async def create_new_empty_job_application(db: AsyncSession = Depends(db_service
 @router.put("/{job_application_id}", response_model=JobApplication)
 async def update_existing_job_application(
     job_application_id: str,
-    job_application: JobApplication,
+    job_application: JobApplicationModel,
     db: AsyncSession = Depends(db_service.get_db)
 ):
     db_job_application = await db_service.crud.update_job_application(
