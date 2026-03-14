@@ -10,9 +10,9 @@ class JobApplication(SQLModel, table=True):
 
     id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     company: Optional[str] = None
-    job_title: Optional[str] = None
-    application_date: Optional[date] = None
-    job_link: Optional[str] = None
+    jobTitle: Optional[str] = None
+    applicationDate: Optional[date] = None
+    jobLink: Optional[str] = None
     status: Optional[JobApplicationStatus] = None
-    response_date: Optional[date] = None
+    responseDate: Optional[date] = None
     notes: Optional[str] = None

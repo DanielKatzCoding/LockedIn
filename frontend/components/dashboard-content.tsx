@@ -2,12 +2,13 @@
 
 import { v4 as uuid } from "uuid"
 import React, { useEffect, useMemo, useCallback, useState, useRef, ClipboardEvent } from "react"
+import { Button } from "@/components/ui/button"
 import { toast } from "react-toastify"
 import { ColumnDef } from "@tanstack/react-table"
 
 import { useCreateEmptyRecord, useDashboardData, useUpdateRow } from "@/hooks/Dashboard"
 import { useDataGrid } from "@/hooks/use-data-grid"
-import { JobDashboard } from "@/types/dashboard"
+import { CreateJobApplicationModel, JobApplicationModel } from "@/types/dashboard"
 
 import { DataGrid } from "./data-grid/data-grid"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -16,17 +17,19 @@ import { DataGridSkeleton, DataGridSkeletonGrid } from "./data-grid/data-grid-sk
 import { DataGridKeyboardShortcuts } from "./data-grid/data-grid-keyboard-shortcuts"
 
 export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
-  const { data: dataDashboardData, isLoading: isLoadingDashboardData, isError: isErrorDashboardData } = useDashboardData(isTest)
-  const { data: dataUpdateRow, mutate: mutateUpdateRow, isPending: isPendingUpdateRow, isError: isErrorUpdateRow } = useUpdateRow()
-  const { data: dataEmptyRecord, mutate: mutateEmptyRecord, isPending: isPendingEmptyRecord, isError: isErrorEmptyRecord } = useCreateEmptyRecord()
-  const [dataState, setDataState] = useState<JobDashboard[]>([])
+  const [page, setPage] = useState(0);
+  const pageSize = 20; // items per page
+  const { data: dataDashboardData, isLoading: isLoadingDashboardData, isError: isErrorDashboardData } = useDashboardData(isTest, page * pageSize, pageSize)
+  const { data: dataUpdateRow, mutateAsync: mutateUpdateRow, isPending: isPendingUpdateRow, isError: isErrorUpdateRow } = useUpdateRow()
+  const { data: dataEmptyRecord, mutateAsync: mutateEmptyRecord, isPending: isPendingEmptyRecord, isError: isErrorEmptyRecord } = useCreateEmptyRecord()
+  const [dataState, setDataState] = useState<JobApplicationModel[]>([])
   const gridRef = useRef<HTMLDivElement>(null)
 
   // Column order for paste mapping (excluding select checkbox)
   const pasteableColumns = useMemo(() => ['company', 'jobTitle', 'applicationDate', 'status', 'responseDate', 'notes'], [])
   
   // Define columns with select checkbox
-  const columns = useMemo<ColumnDef<JobDashboard>[]>(() => [
+  const columns = useMemo<ColumnDef<JobApplicationModel>[]>(() => [
     {
       id: "select",
       header: ({ table }) => (
@@ -102,20 +105,22 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
   ], [])
 
   // Single row add handler
-  const onRowAdd = useCallback(() => {
-    const newRow: JobDashboard = {
-      id: uuid(),
-      company: "",
-      jobTitle: "",
+  const onRowAdd = useCallback(async () => {
+    const newRow: CreateJobApplicationModel = {
+      company: null,
+      jobTitle: null,
       status: null,
-      applicationDate: "",
-      jobLink: "",
-      responseDate: "",
-      notes: ""
+      applicationDate: null,
+      jobLink: null,
+      responseDate: null,
+      notes: null
     }
 
-    mutateEmptyRecord({ newRow, isTest })
-    setDataState((prev) => [...prev, newRow])
+    console.log('Adding new row via mutateEmptyRecord with', newRow);
+    const res = await mutateEmptyRecord({ newRow, isTest });
+    console.log('Received response from empty record creation:', res);
+    setDataState(prev => [...prev, res as JobApplicationModel]);
+    console.log('Row added to state:', res);
     
     return {
       rowIndex: dataState.length,
@@ -124,27 +129,50 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
   }, [dataState.length])
 
   // Delete rows handler
-  const onRowsDelete = useCallback((rows: JobDashboard[]) => {
+  const onRowsDelete = useCallback((rows: JobApplicationModel[]) => {
+    console.log('Deleting rows:', rows);
     setDataState((prev) => prev.filter((row) => !rows.includes(row)))
   }, [])
 
     // When triggered, dataState will be sent to the backend for saving.
-  const setDataStateAndBackend = useCallback((data: JobDashboard[]) => {
+  const setDataStateAndBackend = useCallback(async (data: JobApplicationModel[]) => {
+    // Convert empty strings to null for any column before processing
+    const sanitizedData = data.map((row) => {
+      const newRow = { ...row } as any;
+      Object.keys(newRow).forEach((key) => {
+        // Convert empty strings to null
+        if (newRow[key] === "") {
+          newRow[key] = null;
+        }
+        // If value is a Date object, convert to ISO date string
+        if (newRow[key] instanceof Date) {
+          newRow[key] = newRow[key].toISOString().split('T')[0];
+        }
+        // If a string contains a full datetime, strip time component
+        if (typeof newRow[key] === "string" && newRow[key].includes("T")) {
+          newRow[key] = newRow[key].split("T")[0];
+        }
+      });
+      return newRow as JobApplicationModel;
+    });
+    console.log('setDataStateAndBackend called with data length', sanitizedData.length);
     // Find all rows that have changed
-    const changedRows: JobDashboard[] = [];
-    for (let i = 0; i < data.length; i++) {
+    const changedRows: JobApplicationModel[] = [];
+    for (let i = 0; i < sanitizedData.length; i++) {
       // Compare objects by serializing them to JSON for deep comparison
-      if (JSON.stringify(data[i]) !== JSON.stringify(dataState[i])) {
-        changedRows.push(data[i]);
+      if (JSON.stringify(sanitizedData[i]) !== JSON.stringify(dataState[i])) {
+        changedRows.push(sanitizedData[i]);
       }
     }
 
     // Update all changed rows in the backend
-    changedRows.forEach(row => {
-      mutateUpdateRow({ data: row, isTest: isTest });
+    changedRows.forEach(async (row) => {
+      console.log(row);
+      console.log(sanitizedData);
+      await mutateUpdateRow({ data: row, isTest: isTest });
     });
 
-    setDataState(data);
+    setDataState(sanitizedData);
   }, [dataState, isTest, mutateUpdateRow]);
 
   useEffect(() => {
@@ -187,11 +215,11 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
     onRowAdd,
     onRowsDelete,
     getRowId: (row) => row.id,
-    onPaste: (updates) => {
-      // The DataGrid will handle updating the state and calling onDataChange (setDataStateAndBackend)
-      // So we don't need to do anything here except let it propagate
-      // setDataStateAndBackend will be called automatically through onDataUpdate
-    },
+    // onPaste: (updates) => {
+    //   // The DataGrid will handle updating the state and calling onDataChange (setDataStateAndBackend)
+    //   // So we don't need to do anything here except let it propagate
+    //   // setDataStateAndBackend will be called automatically through onDataUpdate
+    // },
   })
 
   const handleCopy = useCallback((e: ClipboardEvent<HTMLDivElement>) => {
@@ -209,7 +237,7 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
     const csvContent = selectedRows.map(row => {
       return pasteableColumns
         .map(key => {
-          const value = row.original[key as keyof JobDashboard];
+          const value = row.original[key as keyof JobApplicationModel];
           return value !== null && value !== undefined ? String(value) : "";
         })
         .join('\t');
@@ -260,6 +288,15 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
       <div ref={gridRef} onCopyCapture={handleCopy} onPaste={handlePaste}>
         <DataGridKeyboardShortcuts enableSearch={!!dataGridProps.searchState} enablePaste={true} />
         <DataGrid {...dataGridProps} table={table} stretchColumns={true} />
+        <div className="flex items-center justify-center space-x-4 mt-4">
+          <Button variant="outline" onClick={() => setPage(p => Math.max(p - 1, 0))} disabled={page === 0}>
+            Previous
+          </Button>
+          <span>Page {page + 1}</span>
+          <Button variant="outline" onClick={() => setPage(p => p + 1)} disabled={dataDashboardData && dataDashboardData.length < pageSize}>
+            Next
+          </Button>
+        </div>
       </div>
     </TooltipProvider>
   )

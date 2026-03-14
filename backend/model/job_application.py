@@ -5,19 +5,19 @@ from backend.enums.job_application import JobApplicationStatus
 
 class CreateJobApplicationModel(BaseModel):
     company: Optional[str] = None
-    job_title: Optional[str] = None
-    application_date: Optional[date] = None
-    job_link: Optional[str] = None
+    jobTitle: Optional[str] = None
+    applicationDate: Optional[date] = None
+    jobLink: Optional[str] = None
     status: Optional[JobApplicationStatus] = None
-    response_date: Optional[date] = None
+    responseDate: Optional[date] = None
     notes: Optional[str] = None
 
 class JobApplicationModel(BaseModel):
     id: Optional[str] = None
     company: Optional[str] = None
-    job_title: Optional[str] = None
-    application_date: Optional[date] = None
-    job_link: Optional[str] = None
+    jobTitle: Optional[str] = None
+    applicationDate: Optional[date] = None
+    jobLink: Optional[str] = None
     status: Optional[JobApplicationStatus] = None
-    response_date: Optional[date] = None
+    responseDate: Optional[date] = None
     notes: Optional[str] = None

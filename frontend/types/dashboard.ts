@@ -1,15 +1,13 @@
-export type JobDashboard = {
-  id: string
-  company: string
-  jobTitle: string
-  applicationDate: string
-  jobLink: string
+export interface CreateJobApplicationModel {
+  company: string | null
+  jobTitle: string | null
+  applicationDate: string | null
+  jobLink: string | null
   status: "Applied" | "Phone Screen" | "Interview" | "Rejected" | "Offer" | null
-  responseDate: string
-  notes: string
+  responseDate: string | null
+  notes: string | null
 }
 
-export type BarFilter = {
-  field: keyof JobDashboard;
-  value: string;
-};
+export interface JobApplicationModel extends CreateJobApplicationModel {
+  id: string
+}
