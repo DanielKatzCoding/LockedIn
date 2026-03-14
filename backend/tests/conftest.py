@@ -28,8 +28,8 @@ async def async_client():
 @pytest.fixture
 def sample_job_data():
     from datetime import date
-    from backend.model.job_application import CreateJobApplication
-    payload = CreateJobApplication(
+    from backend.model.job_application import CreateJobApplicationModel
+    payload = CreateJobApplicationModel(
         company="Acme Corp",
         job_title="Software Engineer",
         application_date=date(2023, 1, 1),
