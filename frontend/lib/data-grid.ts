@@ -347,7 +347,7 @@ export function formatDateForDisplay(dateStr: unknown): string {
   if (!dateStr) return "";
   const date = parseLocalDate(dateStr);
   if (!date) return typeof dateStr === "string" ? dateStr : "";
-  return date.toLocaleDateString();
+  return date.toLocaleDateString("en-GB");
 }
 
 export function formatFileSize(bytes: number): string {
