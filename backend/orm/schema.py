@@ -8,7 +8,7 @@ from backend.enums.job_application import JobApplicationStatus
 class JobApplication(SQLModel, table=True):
     __tablename__ = "job_applications"
     
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    id: str = Field(default_factory=lambda: str(uuid4()), primary_key=True)
     company: Optional[str] = None
     job_title: Optional[str] = None
     application_date: Optional[date] = None
