@@ -26,7 +26,26 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
   const gridRef = useRef<HTMLDivElement>(null)
 
   // Column order for paste mapping (excluding select checkbox)
-  const pasteableColumns = useMemo(() => ['company', 'jobTitle', 'applicationDate', 'status', 'responseDate', 'notes'], [])
+  const statusOptions = React.useMemo(() => {
+    const raw = process.env.NEXT_PUBLIC_STATUS_TYPES?.trim() ?? '';
+    // Try JSON first
+    let list: string[] = [];
+    if (raw.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.every(v => typeof v === 'string')) {
+          list = parsed;
+        }
+      } catch {}
+    }
+    if (list.length === 0) {
+      // CSV fallback
+      list = raw.replace(/[\[\]"]/g, '').split(',').map(s => s.trim()).filter(Boolean);
+    }
+    return list.map(v => ({ label: v, value: v }));
+  }, []);
+
+  const pasteableColumns = useMemo(() => ['company', 'jobTitle', 'jobLink', 'applicationDate', 'status', 'responseDate', 'notes'], [])
   
   // Define columns with select checkbox
   const columns = useMemo<ColumnDef<JobApplicationModel>[]>(() => [
@@ -64,6 +83,13 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
       size: 180, 
       meta: { cell: { variant: "short-text" } } 
     },
+    {
+      id: "jobLink",
+      accessorKey: "jobLink",
+      header: "Job Link",
+      size: 200,
+      meta: { cell: { variant: "url" } }
+    },
     { 
       id: "applicationDate", 
       accessorKey: "applicationDate", 
@@ -79,12 +105,7 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
       meta: { 
         cell: { 
           variant: "select", 
-          options: [
-            { label: "Applied", value: "Applied" }, 
-            { label: "Interview", value: "Interview" }, 
-            { label: "Offer", value: "Offer" }, 
-            { label: "Rejected", value: "Rejected" }
-          ]
+          options: statusOptions
         }
       }
     },
