@@ -43,9 +43,9 @@ async def test_update_job_application(async_client, sample_job_data):
     update_payload = {
         "id": str(job_id),
         "company": "Globex Corp",
-        "job_title": job["job_title"],
-        "application_date": job["application_date"],
-        "job_link": job["job_link"],
+        "jobTitle": job["jobTitle"],
+        "applicationDate": job["applicationDate"],
+        "jobLink": job["jobLink"],
         "status": "Interview",
         "notes": job["notes"],
     }
