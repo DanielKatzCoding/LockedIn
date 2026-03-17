@@ -31,10 +31,10 @@ def sample_job_data():
     from backend.model.job_application import CreateJobApplicationModel
     payload = CreateJobApplicationModel(
         company="Acme Corp",
-        job_title="Software Engineer",
-        application_date=date(2023, 1, 1),
-        job_link="https://example.com/job",
-        response_date=date(2023, 1, 15),
+        jobTitle="Software Engineer",
+        applicationDate=date(2023, 1, 1),
+        jobLink="https://example.com/job",
+        responseDate=date(2023, 1, 15),
         status="Applied",
         notes="First interview scheduled",
     ).model_dump(mode="json")
