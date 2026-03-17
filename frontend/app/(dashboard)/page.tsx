@@ -5,7 +5,7 @@ export default function DemoPage() {
   return (
     <main className="min-h-screen flex p-20 justify-center">
       <Providers>
-        <DashboardContent isTest={false} />
+        <DashboardContent isTest={process.env.IS_TEST === "true"} />
       </Providers>
     </main>
   )
