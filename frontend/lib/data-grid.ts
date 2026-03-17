@@ -319,18 +319,38 @@ export function getUrlHref(urlString: string): string {
 }
 
 export function parseLocalDate(dateStr: unknown): Date | null {
+  // Accept common date formats: YYYY-MM-DD, DD-MM-YYYY, DD-MM-YY
   if (!dateStr) return null;
   if (dateStr instanceof Date) return dateStr;
   if (typeof dateStr !== "string") return null;
-  const [year, month, day] = dateStr.split("-").map(Number);
+
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return null;
+
+  let year: number, month: number, day: number;
+  if (parts[0].length === 4) {
+    // YYYY-MM-DD
+    year = Number(parts[0]);
+    month = Number(parts[1]);
+    day = Number(parts[2]);
+  } else {
+    // Assume DD-MM-YYYY or DD-MM-YY
+    day = Number(parts[0]);
+    month = Number(parts[1]);
+    const yPart = parts[2];
+    if (yPart.length === 2) {
+      const yy = Number(yPart);
+      // Heuristic: 00-69 => 2000-2069, 70-99 => 1970-1999
+      year = yy < 70 ? 2000 + yy : 1900 + yy;
+    } else {
+      year = Number(yPart);
+    }
+  }
+
   if (!year || !month || !day) return null;
   const date = new Date(year, month - 1, day);
-  // Verify date wasn't auto-corrected (e.g. Feb 30 -> Mar 1)
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
+  // Verify no auto-correction (e.g., 31-02 => 03-03)
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
     return null;
   }
   return date;
