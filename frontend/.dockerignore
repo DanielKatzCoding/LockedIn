@@ -1,0 +1,25 @@
+# Node modules and lock files
+node_modules
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Build artifacts
+.next
+.claude
+out
+build
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Git metadata
+.git
+.gitignore
+
+# Miscellaneous
+Dockerfile
+README.md
