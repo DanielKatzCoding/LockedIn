@@ -1,6 +1,6 @@
-import { JobDashboard } from "@/types/dashboard"
+import { JobApplicationModel } from "@/types/dashboard"
 
-export const mockJobDashboardData: JobDashboard[] = [
+export const mockJobDashboardData: JobApplicationModel[] = [
   {
     id: "1",
     company: "Google",
@@ -323,9 +323,9 @@ export const mockJobDashboardData: JobDashboard[] = [
   }
 ]
 
-export const mockEmptyDashboard: JobDashboard[] = []
+export const mockEmptyDashboard: JobApplicationModel[] = []
 
-export const mockSingleEntry: JobDashboard[] = [
+export const mockSingleEntry: JobApplicationModel[] = [
   {
     id: "1",
     company: "Example Corp",

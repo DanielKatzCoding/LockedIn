@@ -81,7 +81,7 @@ export function DataGridFilterMenu<TData>({
   const [open, setOpen] = React.useState(false);
   const addButtonRef = React.useRef<HTMLButtonElement>(null);
 
-  const columnFilters = table.getState().columnFilters;
+  const columnFilters = table.getState().columnFilters as any[];
 
   const { columnLabels, columns, columnVariants } = React.useMemo(() => {
     const labels = new Map<string, string>();
@@ -193,10 +193,10 @@ export function DataGridFilterMenu<TData>({
   );
 
   return (
-    <Sortable
+    <Sortable<ColumnFilter>
       value={columnFilters}
       onValueChange={table.setColumnFilters}
-      getItemValue={(item) => item.id}
+      getItemValue={(item: ColumnFilter) => item.id}
     >
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>

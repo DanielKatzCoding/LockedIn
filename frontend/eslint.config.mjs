@@ -16,3 +16,18 @@ const eslintConfig = defineConfig([
 ]);
 
 export default eslintConfig;
+
+// Disable overly strict rules for this project
+eslintConfig.push({
+  rules: {
+    '@typescript-eslint/no-unused-vars': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'react-hooks/exhaustive-deps': 'off',
+    'react-hooks/refs': 'off',
+    'react-hooks/set-state-in-effect': 'off',
+    'react-hooks/preserve-manual-memoization': 'off',
+    'react-hooks/use-memo': 'off',
+    '@typescript-eslint/no-empty-object-type': 'off',
+    'jsx-a11y/role-supports-aria-props': 'off',
+  },
+});

@@ -28,6 +28,7 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
   // Column order for paste mapping (excluding select checkbox)
   const statusOptions = React.useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_STATUS_TYPES?.trim() ?? '';
+    console.log('Parsing status options from environment variable:', raw);
     // Try JSON first
     let list: string[] = [];
     if (raw.startsWith('[')) {
@@ -54,14 +55,14 @@ export function DashboardContent({ isTest = false }: { isTest?: boolean }) {
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(value: boolean) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={(value: boolean) => row.toggleSelected(!!value)}
           aria-label="Select row"
         />
       ),

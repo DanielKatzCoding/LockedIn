@@ -4,7 +4,7 @@ import { JobApplicationModel, CreateJobApplicationModel } from '@/types/dashboar
 import { mockJobDashboardData } from '@/lib/mockData'
 import {v4 as uuid4} from 'uuid'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL+"/applications" || 'http://localhost:8000/api/applications'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/applications` : 'http://localhost:8000/api/applications'
 
 export const useDashboardData = (
   isTest: boolean = false,
@@ -35,14 +35,14 @@ export const useCreateEmptyRecord = () => {
   return useMutation({
     mutationFn: async ({newRow, isTest=false}: {newRow: CreateJobApplicationModel, isTest: boolean}) => {
       if (isTest) {
-        mockJobDashboardData.push(newRow)
-
+        const newRecord: JobApplicationModel = { ...newRow, id: uuid4() };
+        mockJobDashboardData.push(newRecord);
         return await new Promise(_ => {
-          setTimeout(() => {         
+          setTimeout(() => {
             console.log("IN useCreateEmptyRecord DATA:")
-            console.log(mockJobDashboardData)   
-            return newRow
-          }, 2000); // 2000ms = 2 seconds
+            console.log(mockJobDashboardData)
+            return newRecord
+          }, 2000);
         });
         
       } else {
@@ -94,9 +94,9 @@ export const useUpdateRow = () => {
           responseDate: formatDate(data.responseDate),
         };
         // Convert empty strings to null in all fields
-        Object.keys(formatted).forEach(key => {
-          if (formatted[key] === '') {
-            formatted[key] = null;
+        (Object.keys(formatted) as Array<keyof typeof formatted>).forEach((key) => {
+          if ((formatted as any)[key] === '') {
+            (formatted as any)[key] = null;
           }
         });
         const { data: rawData } = await axios.put<any>(
