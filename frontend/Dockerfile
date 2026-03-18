@@ -4,7 +4,9 @@ FROM node:20-slim as builder
 WORKDIR /app
 
 # Copy all source code (including package.json)
-COPY . .
+COPY ./frontend .
+# Copy the frontend env file for build‑time variables
+COPY .env.frontend .env.production
 
 # Install pnpm and dependencies
 ENV CI=true
@@ -20,7 +22,6 @@ WORKDIR /app
 COPY --from=builder /app ./
 # Expose the Next.js development server port
 EXPOSE 3000
-# Set environment variables (can be overridden via docker compose)
-ENV NEXT_PUBLIC_STATUS_TYPES=${NEXT_PUBLIC_STATUS_TYPES}
+
 # Start the Next.js app
 CMD ["npm", "run", "start"]
