@@ -124,7 +124,7 @@ function ContextMenuImpl<TData>({
   const onCloseAutoFocus: NonNullable<
     React.ComponentProps<typeof DropdownMenuContent>["onCloseAutoFocus"]
   > = React.useCallback(
-    (event) => {
+    (event: React.FocusEvent) => {
       event.preventDefault();
       propsRef.current.dataGridRef?.current?.focus();
     },

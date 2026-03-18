@@ -3,7 +3,6 @@
 import {
   type Announcements,
   closestCenter,
-  closestCorners,
   DndContext,
   type DndContextProps,
   type DragEndEvent,
@@ -56,7 +55,7 @@ const orientationConfig = {
   mixed: {
     modifiers: [restrictToParentElement],
     strategy: undefined,
-    collisionDetection: closestCorners,
+    collisionDetection: closestCenter,
   },
 };
 
@@ -137,7 +136,7 @@ function SortableRoot<T>(props: SortableRootProps<T>) {
     }),
   );
   const config = React.useMemo(
-    () => orientationConfig[orientation],
+    () => orientationConfig[orientation as keyof typeof orientationConfig],
     [orientation],
   );
 
@@ -154,7 +153,7 @@ function SortableRoot<T>(props: SortableRootProps<T>) {
   );
 
   const items = React.useMemo(() => {
-    return value.map((item) => getItemValue(item));
+    return value.map((item: T) => getItemValue(item));
   }, [value, getItemValue]);
 
   const onDragStart = React.useCallback(
@@ -174,13 +173,14 @@ function SortableRoot<T>(props: SortableRootProps<T>) {
 
       if (event.activatorEvent.defaultPrevented) return;
 
-      const { active, over } = event;
+      const active = event.active;
+    const over = event.over;
       if (over && active.id !== over?.id) {
         const activeIndex = value.findIndex(
-          (item) => getItemValue(item) === active.id,
+          (item: T) => getItemValue(item) === active.id,
         );
         const overIndex = value.findIndex(
-          (item) => getItemValue(item) === over.id,
+          (item: T) => getItemValue(item) === over.id,
         );
 
         if (onMove) {
@@ -207,11 +207,14 @@ function SortableRoot<T>(props: SortableRootProps<T>) {
 
   const announcements: Announcements = React.useMemo(
     () => ({
-      onDragStart({ active }) {
+      onDragStart(event: any) {
+        const active = event.active;
         const activeValue = active.id.toString();
         return `Grabbed sortable item "${activeValue}". Current position is ${active.data.current?.sortable.index + 1} of ${value.length}. Use arrow keys to move, space to drop.`;
       },
-      onDragOver({ active, over }) {
+      onDragOver(event: any) {
+        const active = event.active;
+        const over = event.over;
         if (over) {
           const overIndex = over.data.current?.sortable.index ?? 0;
           const activeIndex = active.data.current?.sortable.index ?? 0;
@@ -221,7 +224,9 @@ function SortableRoot<T>(props: SortableRootProps<T>) {
         }
         return "Sortable item is no longer over a droppable area. Press escape to cancel.";
       },
-      onDragEnd({ active, over }) {
+      onDragEnd(event: any) {
+        const active = event.active;
+        const over = event.over;
         const activeValue = active.id.toString();
         if (over) {
           const overIndex = over.data.current?.sortable.index ?? 0;
@@ -229,12 +234,15 @@ function SortableRoot<T>(props: SortableRootProps<T>) {
         }
         return `Sortable item "${activeValue}" dropped. No changes were made.`;
       },
-      onDragCancel({ active }) {
+      onDragCancel(event: any) {
+        const active = event.active;
         const activeIndex = active.data.current?.sortable.index ?? 0;
         const activeValue = active.id.toString();
         return `Sorting cancelled. Sortable item "${activeValue}" returned to position ${activeIndex + 1} of ${value.length}.`;
       },
-      onDragMove({ active, over }) {
+      onDragMove(event: any) {
+        const active = event.active;
+        const over = event.over;
         if (over) {
           const overIndex = over.data.current?.sortable.index ?? 0;
           const activeIndex = active.data.current?.sortable.index ?? 0;
