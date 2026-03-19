@@ -1,4 +1,6 @@
 # LockedIn
+This platform will allow us to update our job hunt progress on a dashboard 
+
 
 Full-stack app: **Next.js** (frontend) + **Python/FastAPI** (backend).
 
@@ -15,10 +17,11 @@ Full-stack app: **Next.js** (frontend) + **Python/FastAPI** (backend).
 ```bash
 cd backend
 uv sync
-uv run uvicorn main:app --reload
+uv run uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-API runs at **http://localhost:8000**. Docs: http://localhost:8000/docs
+API runs at **http://localhost:8000**. 
+Swagger: http://localhost:8000/docs
 
 ### 2. Frontend (Next.js)
 
@@ -26,8 +29,8 @@ In a new terminal:
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm i
+pnpm run dev
 ```
 
 App runs at **http://localhost:3000**.
@@ -36,9 +39,13 @@ Open http://localhost:3000 — the page will call the Python API and show the we
 
 ## Project layout
 
-- `backend/` — FastAPI app (`main.py`), CORS enabled for `localhost:3000`
-- `frontend/` — Next.js 15 (App Router), fetches from `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`)
+- `backend/` — FastAPI app (`main.py`), CORS enabled.
+- `frontend/` — Next.js 15 (App Router), fetches from `BASE_API_URL` (default `http://localhost:8000/api`)
+- **Database:** Uses a named Docker volume `postgres_data` to persist data across restarts.
 
-## Optional env
+## Running with Docker Compose
 
-- **Frontend:** copy `frontend/.env.local.example` to `frontend/.env.local` and set `NEXT_PUBLIC_API_URL` if the backend is not on port 8000.
+```bash
+docker-compose up -d   # start backend, frontend, and Postgres
+docker-compose down    # stop services (data persists thanks to the named volume)
+```
