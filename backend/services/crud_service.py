@@ -42,7 +42,7 @@ class CRUDService:
 
         for key, value in job_application_update.model_dump(exclude_unset=True).items():
             # Convert date strings to date objects for date fields
-            if key in ("application_date", "response_date"):
+            if key in ("applicationDate", "responseDate"):
                 try:
                     from datetime import date as dt
                     if isinstance(value, str):

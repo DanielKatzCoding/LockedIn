@@ -270,7 +270,7 @@ export function LongTextCell<TData>({
 
   const onOpenAutoFocus: NonNullable<
     React.ComponentProps<typeof PopoverContent>["onOpenAutoFocus"]
-  > = React.useCallback((event) => {
+  > = React.useCallback((event: any) => {
     event.preventDefault();
     if (textareaRef.current) {
       textareaRef.current.focus();
@@ -1099,7 +1099,7 @@ export function MultiSelectCell<TData>({
 
   const onOpenAutoFocus: NonNullable<
     React.ComponentProps<typeof PopoverContent>["onOpenAutoFocus"]
-  > = React.useCallback((event) => {
+  > = React.useCallback((event: any) => {
     event.preventDefault();
     inputRef.current?.focus();
   }, []);
@@ -1847,7 +1847,7 @@ export function FileCell<TData>({
 
   const onEscapeKeyDown: NonNullable<
     React.ComponentProps<typeof PopoverContent>["onEscapeKeyDown"]
-  > = React.useCallback((event) => {
+  > = React.useCallback((event: React.KeyboardEvent) => {
     // Prevent the escape key from propagating to the data grid's keyboard handler
     // which would call blurCell() and remove focus from the cell
     event.stopPropagation();
@@ -1855,7 +1855,7 @@ export function FileCell<TData>({
 
   const onOpenAutoFocus: NonNullable<
     React.ComponentProps<typeof PopoverContent>["onOpenAutoFocus"]
-  > = React.useCallback((event) => {
+  > = React.useCallback((event: any) => {
     event.preventDefault();
     queueMicrotask(() => {
       dropzoneRef.current?.focus();

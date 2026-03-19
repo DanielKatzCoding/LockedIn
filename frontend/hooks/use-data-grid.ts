@@ -31,6 +31,8 @@ import {
   matchSelectOption,
   parseCellKey,
   scrollCellIntoView,
+  parseLocalDate,
+  formatDateToString,
 } from "@/lib/data-grid"; 
 import type {
   CellPosition,
@@ -829,9 +831,13 @@ function useDataGrid<TData>({
                 if (!pastedValue) {
                   processedValue = null;
                 } else {
-                  const date = new Date(pastedValue);
-                  if (Number.isNaN(date.getTime())) shouldSkip = true;
-                  else processedValue = date;
+                  const parsed = parseLocalDate(pastedValue);
+                  if (!parsed) {
+                    shouldSkip = true;
+                  } else {
+                    // Store as ISO string or formatted string consistent with other date handling
+                    processedValue = formatDateToString(parsed);
+                  }
                 }
                 break;
               }

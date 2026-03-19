@@ -1,12 +1,47 @@
+version: "3.9"
+
 services:
-  # Database service shared by dev and prod
-  db:
-    image: postgres:15-alpine
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    env_file: .env.backend
+    environment:
+      - DB_HOST=postgres
+    # Adjust command if using uv run instead of uvicorn
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    env_file: .env.frontend
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:16-alpine
     env_file: .env.db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # Optionally load initial scripts via mounted volume or dockerfile
+    networks:
+      - app-network
 
 volumes:
-  postgres_data:
+    postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

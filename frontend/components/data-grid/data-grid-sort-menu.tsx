@@ -167,10 +167,10 @@ export function DataGridSortMenu<TData>({
   );
 
   return (
-    <Sortable
+    <Sortable<ColumnSort>
       value={sorting}
       onValueChange={onSortingChange}
-      getItemValue={(item) => item.id}
+      getItemValue={(item: ColumnSort) => item.id}
     >
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
