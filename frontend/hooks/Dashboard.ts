@@ -4,7 +4,7 @@ import { JobApplicationModel, CreateJobApplicationModel } from '@/types/dashboar
 import { mockJobDashboardData } from '@/lib/mockData'
 import {v4 as uuid4} from 'uuid'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/applications` : 'http://localhost:8000/api/applications'
+const API_BASE_URL = process.env.API_BASE_URL ? `${process.env.API_BASE_URL}/applications` : 'http://localhost:8000/api/applications'
 
 export const useDashboardData = (
   isTest: boolean = false,

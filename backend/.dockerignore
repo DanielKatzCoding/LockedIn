@@ -25,6 +25,7 @@ Dist/
 *.swp
 
 tests/
+test_db.db
 pytest.ini
 pytest_cache/
 
